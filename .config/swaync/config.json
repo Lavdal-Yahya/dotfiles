@@ -1,0 +1,55 @@
+{
+  "$schema": "/etc/xdg/swaync/configSchema.json",
+
+  "positionX": "right",
+  "positionY": "top",
+  "layer": "overlay",
+  "layer-shell": true,
+  "cssPriority": "user",
+
+  "notification-window-width": 320,
+  "notification-window-height": 500,
+
+  "timeout": 6,
+  "timeout-low": 6,
+  "timeout-critical": 6,
+
+  "notification-grouping": true,
+  "image-visibility": "always",
+  "transition-time": 0,
+
+  "notification-2fa-action": true,
+
+  "widgets": [
+    "title",
+    "dnd",
+    "notifications"
+  ],
+
+  "widget-config": {
+    "title": {
+      "text": "Notifications",
+      "clear-all-button": true,
+      "button-text": "Clear All"
+    },
+    "dnd": {
+      "text": "Do Not Disturb"
+    },
+    "notifications": {
+      "text": "Notifications"
+    }
+  },
+
+  "scripts": {
+    "song-art-logger": {
+      "exec": "~/.config/swaync/scripts/songArtLogger.sh",
+      "app-name": ".*",
+      "run-on": "receive"
+    },
+    "critical-sound": {
+      "exec": "~/.config/swaync/scripts/playNotificationSound.sh",
+      "urgency": "Critical",
+      "run-on": "receive"
+    }
+  }
+}

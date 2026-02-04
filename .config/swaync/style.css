@@ -1,0 +1,94 @@
+/* Global */
+* {
+    font-family: "Product Sans";
+    font-size: 10pt;
+  }
+  
+  /* Notification card */
+  .notification {
+    background: #0d0f16;
+    color: #CDD6F4;
+  
+    border-radius: 17px;
+    border: 3px solid #1C2325;
+  
+    /* dunst padding=16, horizontal_padding=12 */
+    padding: 16px 12px;
+  
+  /* dunst separator-ish spacing */
+  margin: 3px 0;
+}
+  
+  /* Urgency-specific frame colors */
+  .notification.low {
+    border-color: #191d24;
+  }
+  .notification.normal {
+    border-color: #0d0f16;
+  }
+  .notification.critical {
+    border-color: #0d0f16;
+  }
+  
+  /* Accent “highlight” (your dunst highlight colors) */
+  .notification.low {
+    box-shadow: inset 6px 0 0 #7ba5dd;
+  }
+  .notification.normal {
+    box-shadow: inset 6px 0 0 #7ba5dd;
+  }
+  .notification.critical {
+    box-shadow: inset 6px 0 0 #ee6a70;
+  }
+  
+/* Title/body layout to match: "<b>%s</b>\n%b" */
+.summary {
+  font-weight: 700;
+}
+.body {
+  margin-top: 8px;
+}
+  
+/* Icons: left, with padding like text_icon_padding=16 */
+.image {
+  margin-right: 16px;
+  border-radius: 12px;
+
+  /* dunst min/max icon size */
+  min-width: 32px;
+  min-height: 32px;
+}
+  
+  /* Progress bar styling (dunst progress_bar*) */
+  .notification progress,
+  .notification trough,
+  .notification progressbar {
+    border-radius: 17px;
+  }
+  
+  /* Height (roughly like progress_bar_height=14, plus a little breathing room) */
+  .notification progress,
+  .notification trough {
+    min-height: 14px;
+  }
+  
+/* Min/max width like dunst */
+.notification progress {
+  min-width: 150px;
+}
+  
+  /* Frame width like progress_bar_frame_width=1 */
+  .notification trough {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+  }
+  
+  /* Progress fill color based on urgency */
+  .notification.low progress,
+  .notification.normal progress {
+    background-color: #7ba5dd;
+  }
+  .notification.critical progress {
+    background-color: #ee6a70;
+  }
+  

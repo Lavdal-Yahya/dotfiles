@@ -1,0 +1,12 @@
+/**
+ * Catppuccin Mocha (Rofi variables)
+ **/
+* {
+    background:     #1E222E; /* base */
+    background-alt: #181825FF; /* mantle */
+    foreground:     #ffffff; /* text */
+
+    selected:       #93abf6; 
+    active:         #4155d7; 
+    urgent:         #F38BA8FF; 
+}
