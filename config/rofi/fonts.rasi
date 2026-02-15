@@ -1,0 +1,13 @@
+/**
+ *
+ * Author : Aditya Shakya (adi1090x)
+ * Github : @adi1090x
+ * 
+ * Fonts
+ *
+ **/
+
+* {
+  font-family: "JetBrains Mono Nerd Font";
+  font-size: 10.6px;
+}

@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROFI_THEME="${ROFI_THEME:-}" # optionally export ROFI_THEME=/path/to/theme.rasi
+ROFI_BASE=(rofi -dmenu -i -p "Wi-Fi" -matching fuzzy)
+[[ -n "$ROFI_THEME" ]] && ROFI_BASE+=(-theme "$ROFI_THEME")
+
+notify() {
+  local title="${1:-}"
+  local body="${2:-}"
+  notify-send -a "NetworkManager" -i network-wireless "$title" "$body"
+}
+
+
+# --- Wi-Fi state toggle label ---
+wifi_state="$(nmcli -t -f WIFI g | head -n1)"   # enabled|disabled
+if [[ "$wifi_state" == "enabled" ]]; then
+  toggle="睊  Disable Wi-Fi"
+else
+  toggle="直  Enable Wi-Fi"
+fi
+
+# --- current active SSID (if any) ---
+active_ssid="$(
+  nmcli -t -f ACTIVE,SSID dev wifi 2>/dev/null \
+  | awk -F: '$1=="yes"{print substr($0, index($0,$2)); exit}'
+)"
+
+# --- Build menu list (pretty) ---
+# Fields:
+# ACTIVE,SSID,SECURITY,SIGNAL
+# Use -t for stable parsing; SSID can still contain ":" rarely, but nmcli is generally ok.
+# If you want to be extra-safe against ":", we can switch to BSSID-based connecting later.
+mapfile -t lines < <(nmcli -t -f ACTIVE,SSID,SECURITY,SIGNAL dev wifi list 2>/dev/null || true)
+
+menu_items=()
+for line in "${lines[@]}"; do
+  IFS=: read -r active ssid security signal <<<"$line"
+
+  # Skip empty SSID entries (hidden)
+  [[ -z "${ssid:-}" ]] && continue
+
+  # connected marker
+  if [[ "${active:-}" == "yes" ]]; then
+    mark=""   # connected dot
+  else
+    mark=""
+  fi
+
+  # signal display (0-100)
+  sig="${signal:-0}"
+  menu_items+=( "$(printf "%s  %3s%%  %s" "$mark" "$sig" "$ssid")" )
+done
+
+# If Wi-Fi is disabled, there might be no list; still allow toggle
+notify "Wi-Fi" "Scanning available networks…"
+choice="$(
+  {
+    echo "$toggle"
+    printf '%s\n' "${menu_items[@]}"
+  } | "${ROFI_BASE[@]}"
+)"
+
+[[ -z "${choice:-}" ]] && exit 0
+
+# --- Handle toggle actions ---
+if [[ "$choice" == "$toggle" ]]; then
+  if [[ "$wifi_state" == "enabled" ]]; then
+    nmcli radio wifi off
+    notify "Wi-Fi" "Disabled"
+  else
+    nmcli radio wifi on
+    notify "Wi-Fi" "Enabled"
+  fi
+  exit 0
+fi
+
+# --- Extract SSID from the choice line (everything after the last "  " groups) ---
+# Format: "<mark>  <sec>  <sig>%  <ssid>"
+ssid="${choice#*%  }"
+
+# If already connected, just inform
+if [[ -n "${active_ssid:-}" && "$ssid" == "$active_ssid" ]]; then
+  notify "Wi-Fi" "Already connected to \"$ssid\""
+  exit 0
+fi
+
+# Check if saved connection exists (exact match)
+if nmcli -t -f NAME connection show | grep -Fxq "$ssid"; then
+  if nmcli connection up id "$ssid" >/dev/null 2>&1; then
+    notify "Connection Established" "You are now connected to \"$ssid\"."
+  else
+    notify "Wi-Fi" "Failed to activate saved connection: \"$ssid\""
+    exit 1
+  fi
+  exit 0
+fi
+
+# Not saved: connect (ask password only if secured)
+security="$(nmcli -t -f SSID,SECURITY dev wifi list | awk -F: -v s="$ssid" '$1==s{print $2; exit}')"
+if [[ -n "${security:-}" && "$security" != "--" ]]; then
+  password="$(
+    rofi -dmenu -password -p "Password for $ssid"
+  )"
+  [[ -z "${password:-}" ]] && exit 0
+  if nmcli dev wifi connect "$ssid" password "$password" >/dev/null 2>&1; then
+    notify "Connection Established" "You are now connected to \"$ssid\"."
+  else
+    notify "Wi-Fi" "Connection failed (wrong password or network issue)."
+    exit 1
+  fi
+else
+  if nmcli dev wifi connect "$ssid" >/dev/null 2>&1; then
+    notify "Connection Established" "You are now connected to \"$ssid\"."
+  else
+    notify "Wi-Fi" "Connection failed."
+    exit 1
+  fi
+fi

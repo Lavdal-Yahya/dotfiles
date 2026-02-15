@@ -1,0 +1,160 @@
+/* @import "./theme.css"; */
+@import "colors.css";
+
+* {
+  font-family: JetBrainsMono Nerd Font;
+  font-size: 16px;
+}
+
+window#waybar {
+  background-color: @surface_container;
+  color: @on_background;
+  border: none;
+  border-bottom: 1px solid @waybar_accent; /* subtle themed outline */
+}
+
+window#waybar.hidden {
+  opacity: 0.5;
+}
+
+#workspaces button {
+  padding: 0 6px;
+  color: @on_background;
+  background: transparent;
+  border: none;
+}
+
+#workspaces button.active {
+  /* Make the active workspace *feel* active */
+  background-color: @waybar_accent;
+  color: @waybar_accent_fg;
+  border-radius: 10px;
+}
+
+#workspaces button.urgent {
+  color: @error;
+}
+
+#window {
+  color: @on_background;
+}
+
+/* Shared baseline spacing (text-only look) */
+#clock,
+#battery,
+#cpu,
+#memory,
+#disk,
+#temperature,
+#backlight,
+#network,
+#pulseaudio,
+#tray,
+#bluetooth,
+#custom-launcher,
+#custom-power-menu,
+#custom-spotify,
+#custom-sysinfo,
+#window,
+#workspaces {
+  padding: 2 0px;
+  margin: 0 6px;
+  color: @on_background;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+#window,
+#workspaces {
+  margin: 0 6px;
+  border-radius: 0;
+}
+
+/* If you want sysinfo themed too, switch this later to @waybar_accent_fg */
+#custom-sysinfo {
+  color: @on_background;
+  margin: 0 4px;
+}
+
+#custom-power-menu {
+  border-radius: 7.5px;
+  padding: 0 5px;
+  margin-right: 12px;
+  color: @waybar_accent_fg;
+}
+
+#custom-launcher {
+  color: @waybar_accent_fg;
+  border-radius: 7.5px;
+  padding: 0 3px;
+}
+
+/* If workspaces is the leftmost module, omit left margin */
+.modules-left > widget:first-child > #workspaces {
+  margin-left: 0;
+}
+
+/* If workspaces is the rightmost module, omit right margin */
+.modules-right > widget:last-child > #workspaces {
+  margin-right: 0;
+}
+
+#clock { color: @on_background; }
+
+/* keep green until you define a success var in theme.css */
+#battery.charging,
+#battery.full,
+#battery.plugged {
+  color: @green;
+}
+
+#battery.critical:not(.charging),
+#network.disconnected,
+#bluetooth.disconnected {
+  color: @error;
+}
+
+@keyframes blink {
+  to {
+    background-color: @waybar_accent;
+    color: @waybar_accent_fg;
+  }
+}
+
+#battery.critical:not(.charging) {
+  color: @error;
+  animation-name: blink;
+  animation-duration: 0.5s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+label:focus {
+  background-color: @waybar_accent;
+}
+
+#bluetooth {
+  color: @on_background;
+}
+
+#bluetooth.disconnected {
+  color: @error;
+}
+
+#network {
+  color: @on_background;
+}
+
+#network.disconnected {
+  color: @error;
+}
+
+#tray > .passive {
+  -gtk-icon-effect: dim;
+}
+
+#mpd.disconnected {
+  color: @error;
+}

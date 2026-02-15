@@ -1,0 +1,38 @@
+# secrets
+**/.ssh/**
+**/*.key
+**/*.pem
+**/*.p12
+**/*.kdbx
+**/*token*
+**/*secret*
+
+# backups
+**/*.bak
+**/*~
+**/odyssey.bak-*/
+**/.cache/**
+**/Cache/**
+**/cache/**
+
+# app state / giant dirs
+config/Code/**
+config/Cursor/**
+config/Windsurf/**
+config/mozilla/**
+config/spotify/**
+config/Trash/**
+config/gvfs-metadata/**
+config/Google/**
+config/Android Open Source Project/**
+config/Electron/**
+config/obs-studio/logs/**
+config/obs-studio/profiler_data/**
+
+# logs
+**/logs/**
+**/*.log
+
+# OS cruft
+.DS_Store
+Thumbs.db

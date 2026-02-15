@@ -1,0 +1,134 @@
+[
+  {
+    "layer": "top",
+    "position": "top",
+    "height": 30,
+    "margin-top": 0,
+    "margin-left": 0,
+    "margin-right": 0,
+    "margin-bottom": 0,
+    "spacing": 0,
+    "modules-left": [
+      "hyprland/workspaces"
+    ],
+    "modules-center": [
+      "mpris"
+    ],
+    "modules-right": [
+      "custom/sysinfo",
+      "pulseaudio",
+      "bluetooth",
+      "network",
+      "battery",
+      "clock",
+      "custom/power-menu"
+    ],
+    "hyprland/workspaces": {
+      "format": "{name}",
+      "on-click": "activate",
+      "persistent-workspaces": {
+        "*": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      }
+    },
+    "mpris": {
+      "format": "{artist} {title}",
+      "format-paused": "{artist} {title}",
+      "player-icons": {
+        "default": ""
+      },
+      "status-icons": {
+        "paused": ""
+      },
+      "max-length": 60,
+      "tooltip-format": "{player}: {artist} - {title}"
+    },
+    "memory": {
+      "interval": 5,
+      "format": "{used:0.1f}gb",
+      "tooltip-format": "RAM: {used:0.1f} / {total:0.1f} GB",
+      "on-click": "~/.config/waybar/scripts/sys-expand.sh toggle",
+      "signal": 9
+    },
+    "custom/sysinfo": {
+      "exec": "~/.config/waybar/scripts/sys-expand.sh",
+      "return-type": "json",
+      "interval": 5,
+      "signal": 9,
+      "on-click": "~/.config/waybar/scripts/sys-expand.sh toggle"
+    },
+    "battery": {
+      "bat": "BAT0",
+      "adapter": "ADP0",
+      "interval": 30,
+      "states": {
+        "warning": 30,
+        "critical": 15
+      },
+      "format": "{icon}{capacity}%",
+      "format-charging": "{icon} {capacity}%",
+      "format-plugged": " {capacity}%",
+      "format-warning": "{icon} {capacity}%",
+      "format-critical": "{icon} {capacity}%",
+      "format-icons": [
+        " ",
+        " ",
+        " ",
+        " ",
+        " "
+      ]
+    },
+    "pulseaudio": {
+      "format": "{icon}",
+      "format-muted": "󰖁",
+      "format-icons": {
+        "default": [
+          "󰕿",
+          "󰖀",
+          "󰕾"
+        ]
+      },
+      "on-click": "pavucontrol"
+    },
+    "bluetooth": {
+      "format": "{icon}",
+      "format-off": "󰂲",
+      "format-disabled": "󰂲",
+      "format-on": "󰂯",
+      "format-connected": "󰂱",
+      "on-click": "~/.config/rofi/scripts/bluetooth-menu &",
+      "tooltip-format": "{controller_alias}\n{status}\n{num_connections} connected"
+    },
+    "network": {
+      "interval": 2,
+      "format-wifi": "󰤨",
+      "format-ethernet": "󰈀",
+      "format-disconnected": "󰤮",
+      "tooltip-format": "{ifname}\n{ipaddr}",
+      "tooltip-format-disconnected": "Wi-Fi is off / disconnected",
+      "on-click": "bash ~/.config/rofi/scripts/wifi-menu",
+      "ipaddr": true,
+      "family": "ipv4"
+    },
+    "custom/power-menu": {
+      "format": "⏻",
+      "on-click": "bash ~/.config/waybar/scripts/power-menu/powermenu.sh"
+    },
+    "tray": {
+      "spacing": 10
+    },
+    "clock": {
+      "format": "{:%H:%M}",
+      "tooltip-format": "<big>{:%B %Y}</big>\n<tt><small>{calendar}</small></tt>"
+    },
+    "custom-launcher": {
+      "format": "󰍹",
+      "on-click": "~/.config/waybar/scripts/app-launcher.sh &"
+    }
+  }
+]
