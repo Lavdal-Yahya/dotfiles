@@ -1,61 +1,81 @@
-#!/bin/bash
-# Dotfiles install script - symlink-based, with backup
-# Usage: ./scripts/install.sh
-
+#!/usr/bin/env bash
 set -euo pipefail
 
 DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
-BACKUP_DIR="$HOME/.dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
+LOCALBIN_DIR="${HOME}/.local/bin"
+TS="$(date +%Y%m%d-%H%M%S)"
+BACKUP_DIR="${HOME}/.dotfiles-backup/${TS}"
 
-mkdir -p "$BACKUP_DIR"
-echo "Backups will be saved to: $BACKUP_DIR"
+mkdir -p "${BACKUP_DIR}" "${CONFIG_DIR}" "${LOCALBIN_DIR}"
 
-# Backup and symlink a path
-link_config() {
-  local src="$1"
-  local dst="$2"
-  if [[ -e "$dst" && ! -L "$dst" ]]; then
-    echo "Backing up $dst -> $BACKUP_DIR/"
-    cp -a "$dst" "$BACKUP_DIR/$(basename "$dst")" 2>/dev/null || mv "$dst" "$BACKUP_DIR/"
-  fi
-  if [[ -L "$dst" ]]; then
-    rm -f "$dst"
-  fi
-  mkdir -p "$(dirname "$dst")"
-  ln -sfn "$src" "$dst"
-  echo "Linked: $dst -> $src"
+log() { printf "\n\033[1m%s\033[0m\n" "$*"; }
+
+backup_path() {
+  local dst="$1"
+  [[ -e "${dst}" || -L "${dst}" ]] || return 0
+
+  # preserve relative path under $HOME to avoid collisions
+  local rel
+  rel="${dst#${HOME}/}"
+  mkdir -p "${BACKUP_DIR}/$(dirname "${rel}")"
+  mv -f "${dst}" "${BACKUP_DIR}/${rel}"
 }
 
-# Config directories
+link_path() {
+  local src="$1"
+  local dst="$2"
+
+  [[ -e "${src}" || -L "${src}" ]] || return 0
+  mkdir -p "$(dirname "${dst}")"
+  backup_path "${dst}"
+  ln -s "${src}" "${dst}"
+  echo "Linked: ${dst} -> ${src}"
+}
+
+log "Dotfiles install"
+echo "Repo:   ${DOTFILES_ROOT}"
+echo "Backup: ${BACKUP_DIR}"
+
+# Link core config directories
+log "Linking ~/.config"
 for dir in hypr waybar rofi swaync swayosd kitty ghostty tmux environment.d systemd odyssey; do
-  src="$DOTFILES_ROOT/config/$dir"
-  dst="$CONFIG_DIR/$dir"
-  [[ -d "$src" ]] || continue
-  link_config "$src" "$dst"
+  src="${DOTFILES_ROOT}/config/${dir}"
+  dst="${CONFIG_DIR}/${dir}"
+  [[ -d "${src}" ]] || continue
+  link_path "${src}" "${dst}"
 done
 
-# Home dotfiles
-link_config "$DOTFILES_ROOT/home/.zshrc" "$HOME/.zshrc"
-link_config "$DOTFILES_ROOT/home/.bashrc" "$HOME/.bashrc"
-link_config "$DOTFILES_ROOT/home/.gitconfig" "$HOME/.gitconfig"
+# Home dotfiles (only if present in repo)
+log "Linking home dotfiles"
+for f in .zshrc .bashrc .gitconfig; do
+  src="${DOTFILES_ROOT}/home/${f}"
+  [[ -f "${src}" ]] || continue
+  link_path "${src}" "${HOME}/${f}"
+done
 
 # Local bin
-mkdir -p "$HOME/.local/bin"
-for f in "$DOTFILES_ROOT/localbin"/*; do
-  [[ -e "$f" ]] || continue
-  name=$(basename "$f")
-  link_config "$f" "$HOME/.local/bin/$name"
-done
-
-# Ensure odyssey/current exists
-odyssey_current="$CONFIG_DIR/odyssey/current"
-if [[ ! -e "$odyssey_current" ]]; then
-  default_theme="void"
-  ln -sfn "themes/$default_theme" "$odyssey_current"
-  echo "Created odyssey/current -> themes/$default_theme"
+log "Linking ~/.local/bin"
+if [[ -d "${DOTFILES_ROOT}/localbin" ]]; then
+  shopt -s nullglob
+  for f in "${DOTFILES_ROOT}/localbin/"*; do
+    name="$(basename "${f}")"
+    link_path "${f}" "${LOCALBIN_DIR}/${name}"
+  done
+  shopt -u nullglob
 fi
 
-echo ""
-echo "Install complete. Restart Hyprland or log out and back in for full effect."
-echo "Enable battery-warn timer: systemctl --user enable --now battery-warn.timer"
+# Ensure odyssey/current exists (relative symlink is best)
+log "Odyssey current theme"
+odyssey_current="${CONFIG_DIR}/odyssey/current"
+if [[ ! -e "${odyssey_current}" && ! -L "${odyssey_current}" ]]; then
+  default_theme="void"
+  ln -s "themes/${default_theme}" "${odyssey_current}"
+  echo "Created: ${odyssey_current} -> themes/${default_theme}"
+fi
+
+log "Done ✅"
+echo "Next:"
+echo "  systemctl --user daemon-reload"
+echo "  systemctl --user enable --now battery-warn.timer"
+echo "  (optional) ${DOTFILES_ROOT}/scripts/apply-theme.sh void"

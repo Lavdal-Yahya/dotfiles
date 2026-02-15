@@ -9,7 +9,7 @@ ln -sf "$src" "$HOME/.config/btop/themes/current.theme"
 # Fix hardcoded path in btop.conf
 btop_conf="$HOME/.config/btop/btop.conf"
 if [[ -f "$btop_conf" ]]; then
-    sed -i -E "s|/home/[^/]+/.config|$HOME/.config|g" "$btop_conf"
+    sed -i -E "s|^/[^/]+/[^/]+/\.config|$HOME/.config|g" "$btop_conf"
 fi
 
 pgrep -x btop &>/dev/null && pkill -SIGUSR2 btop 2>/dev/null
